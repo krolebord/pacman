@@ -1,0 +1,16 @@
+---
+import { assetPaths } from "../assetPaths";
+---
+
+{
+  Object.entries(assetPaths).map(([key, value]) => {
+    return (
+      <img
+        id={`asset-${key}`}
+        src={`/assets/${value}`}
+        alt={key}
+        class="hidden [image-rendering:pixelated]"
+      />
+    );
+  })
+}

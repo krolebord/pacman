@@ -1,0 +1,13 @@
+---
+import Assets from "../components/assets.astro";
+import Document from "../components/document.astro";
+---
+
+<Document>
+  <header class="pt-2"><span id="score-label">0</span></header>
+  <canvas id="main-canvas" class="mt-2 border border-slate-700"></canvas>
+  <Assets />
+  <script>
+    import "../index.ts";
+  </script>
+</Document>
