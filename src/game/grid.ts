@@ -39,6 +39,8 @@ export class GameGrid {
   }
 
   getCell(pos: Point) {
+    const row = this.grid[pos.y];
+    if (!row) return null;
     return this.grid[pos.y][pos.x];
   }
 
@@ -52,14 +54,17 @@ export class GameGrid {
   }
 
   getNeighbouringCells(pos: Point) {
-    return [
+    const t = [
       { y: pos.y - 1, x: pos.x },
       { y: pos.y + 1, x: pos.x },
       { y: pos.y, x: pos.x - 1 },
       { y: pos.y, x: pos.x + 1 },
-    ].map((pos) => ({
-      ...pos,
-      cell: this.getCell(pos),
-    }));
+    ]
+      .map((pos) => ({
+        ...pos,
+        cell: this.getCell(pos),
+      }))
+      .filter((x) => !!x.cell);
+    return t;
   }
 }

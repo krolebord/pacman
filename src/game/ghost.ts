@@ -108,6 +108,10 @@ export class Ghost {
     return this.pos;
   }
 
+  getDir() {
+    return this.dir;
+  }
+
   setPos(pos: Point) {
     this.pos = new ActorPos(pos.x, pos.y);
     this.nextPos = pos;

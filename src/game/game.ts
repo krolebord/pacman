@@ -2,6 +2,7 @@ import type { Engine } from "./engine";
 import { Ghost, type AIState } from "./ghost";
 import { GameGrid } from "./grid";
 import { Pacman } from "./pacman";
+import { PacmanAI } from "./pacman-ai";
 import type { Point } from "./types";
 
 const ghostSpawn = {
@@ -16,7 +17,12 @@ const rightPortalOutPos = { x: 26, y: 14 };
 
 export class Game {
   private score = 0;
-  private pacman = new Pacman({ x: 13, y: 23 }, 8);
+  private ai = true;
+  private pacman = new Pacman(
+    { x: 13, y: 23 },
+    Math.round(Math.random() * 4) + 6
+  );
+  private pacmanAI = new PacmanAI();
 
   private modeTimer = 0;
   private modeTimers = [
@@ -31,11 +37,11 @@ export class Game {
   ].reverse();
 
   private lastGhostSpawn = 0;
-  private ghostSpawns = [
-    new Ghost("blinky", ghostSpawn, 6),
-    new Ghost("inky", ghostSpawn, 9),
-    new Ghost("pinky", ghostSpawn, 7),
-    new Ghost("clyde", ghostSpawn, 7),
+  private ghostSpawns: Ghost[] = [
+    new Ghost("blinky", ghostSpawn, Math.round(Math.random() * 4) + 3),
+    new Ghost("inky", ghostSpawn, Math.round(Math.random() * 4) + 3),
+    new Ghost("pinky", ghostSpawn, Math.round(Math.random() * 4) + 3),
+    new Ghost("clyde", ghostSpawn, Math.round(Math.random() * 4) + 3),
   ].reverse();
 
   private ghostMode: AIState = "scatter";
@@ -75,9 +81,7 @@ export class Game {
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   ]);
 
-  constructor(private readonly engine: Engine) {
-    this.engine.setHeader(`Score: ${this.score}`);
-  }
+  constructor(private readonly engine: Engine) {}
 
   update() {
     if (
@@ -100,10 +104,14 @@ export class Game {
       this.ghosts.push(ghost);
     }
 
-    this.pacman.update(this.engine, this.grid);
     this.ghosts.forEach((ghost) =>
       ghost.update(this.engine, this.grid, this.pacman, this.ghosts)
     );
+
+    this.pacman.update(this.engine, this.grid);
+    if (this.ai) {
+      this.pacmanAI.update(this.grid, this.pacman, this.ghosts);
+    }
 
     const pacmanPos = this.pacman.getPos();
     const pacmanCell = this.grid.getCell(pacmanPos);
@@ -134,7 +142,13 @@ export class Game {
   }
 
   draw() {
+    this.engine.setHeader(
+      `Score: ${this.score} (AI: ${this.ai ? "on" : "off"})`
+    );
     this.pacman.draw(this.engine);
+    if (this.ai) {
+      this.pacmanAI.draw(this.engine);
+    }
     this.ghosts.forEach((ghost) => ghost.draw(this.engine));
     this.grid.draw(this.engine);
   }
@@ -143,7 +157,6 @@ export class Game {
     this.grid.clearCell(pos);
 
     this.score += 10;
-    this.engine.setHeader(`Score: ${this.score}`);
 
     if (this.score === 2400) {
       this.engine.setHeader("You Win!");
@@ -164,6 +177,9 @@ export class Game {
         break;
       case "ArrowRight":
         this.pacman.setInputDir({ x: 1, y: 0 });
+        break;
+      case " ":
+        this.ai = !this.ai;
         break;
     }
   }
