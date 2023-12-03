@@ -16,30 +16,27 @@ export class PacmanAI {
 
     distances.set(pacmanPos.x, pacmanPos.y, 0);
 
+    const blocked = new DoubleMap<boolean>();
+    ghosts.forEach((g) => {
+      const gPos = g.getPos();
+      const gDir = g.getDir();
+      const gNext = {
+        x: gPos.x + gDir.x,
+        y: gPos.y + gDir.y,
+      };
+      blocked.set(gPos.x, gPos.y, true);
+      blocked.set(gNext.x, gNext.y, true);
+    });
+
     while (queue.length > 0) {
       const pos = queue.shift()!;
       const cell = grid.getCell(pos);
 
       visited.set(pos.x, pos.y, true);
 
-      const neighbours = grid.getNeighbouringCells(pos).filter(
-        (x) =>
-          x.cell !== "X" &&
-          ghosts.every((g) => {
-            const gPos = g.getPos();
-            const gDir = g.getDir();
-            const gNext = {
-              x: gPos.x + gDir.x,
-              y: gPos.y + gDir.y,
-            };
-            return (
-              gPos.x !== x.x ||
-              gPos.y !== x.y ||
-              gNext.x !== pos.x ||
-              gNext.y !== pos.y
-            );
-          })
-      );
+      const neighbours = grid
+        .getNeighbouringCells(pos)
+        .filter((x) => x.cell !== "X" && !blocked.has(x.x, x.y));
 
       const nextDistance = distances.get(pos.x, pos.y)! + 1;
       neighbours.forEach((neighbour) => {
